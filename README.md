@@ -42,8 +42,9 @@ First, create an instance of LGoogleMutant passing the type of base map as a par
 final LGoogleMutant satellite = new LGoogleMutant(LGoogleMutant.Type.SATELLITE);
 final LGoogleMutant terrain = new LGoogleMutant(LGoogleMutant.Type.TERRAIN);
 ```
-```java
+
 Then, you can add the created base maps to the leaflet map:
+```java
 leafletMap.addBaseLayer(satellite, "Google Satellite");
 leafletMap.addBaseLayer(terrain, "Google Terrain");
 ```
