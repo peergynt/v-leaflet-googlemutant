@@ -37,6 +37,18 @@ protected void servletInitialized() throws ServletException {
 
 ```
 
+First, create an instance of LGoogleMutant passing the type of base map as a parameter. If empty constructor is used, then type ROADMAP is the default:
+```java
+final LGoogleMutant satellite = new LGoogleMutant(LGoogleMutant.Type.SATELLITE);
+final LGoogleMutant terrain = new LGoogleMutant(LGoogleMutant.Type.TERRAIN);
+```
+```java
+Then, you can add the created base maps to the leaflet map:
+leafletMap.addBaseLayer(satellite, "Google Satellite");
+leafletMap.addBaseLayer(terrain, "Google Terrain");
+```
+
+
 The implementation depends on g-leaflet-googlemutant project. During development you'll most likely want to check out that as well. When using the add-on, dependency should be automatically resolved.
 
 https://github.com/mstahv/g-leaflet-googlemutant
