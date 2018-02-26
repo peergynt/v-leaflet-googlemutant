@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <groupId>org.vaadin.addon</groupId>
     <artifactId>v-leaflet-googlemutant</artifactId>
     <packaging>jar</packaging>
@@ -12,9 +12,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>8.0.0</vaadin.version>
-        <v-leaflet-version>2.0.1-SNAPSHOT</v-leaflet-version>
-        <g-leaflet-googlemutant-version>1.0.0</g-leaflet-googlemutant-version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <vaadin.version>8.2.1</vaadin.version>
+        <v-leaflet-version>2.0.5</v-leaflet-version>
+        <g-leaflet-googlemutant-version>1.0.1-SNAPSHOT</g-leaflet-googlemutant-version>
     </properties>
 
     <organization>
@@ -34,14 +36,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -86,7 +80,7 @@
 
             <!-- This creates a zip file of jar and sources jar. When publishing in
             the Directory this makes sources available to maven users automatically.
-            We could also use this to package required dependecies for those poor developer
+            We could also use this to package required dependencies for those poor developer
             souls that still dont know how to use a build system that supports transient
             dependencies... -->
             <plugin>
@@ -100,165 +94,22 @@
                     </descriptors>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>testwidgetset</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skipTests}</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeScope>runtime</includeScope>
-                            <outputDirectory>target/libs</outputDirectory>
-                            <!-- configure the plugin here -->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
 
         </plugins>
 
+        <!-- This is needed for the sources required by the client-side compiler to be
+            included in the produced JARs -->
         <resources>
             <resource>
-                <!-- This add sources, .gwt.xml files etc to jar from source directory.
-                Not quite maven convention byt easieast to setup this way. -->
                 <directory>src/main/java</directory>
+                <excludes>
+                    <exclude>rebel.xml</exclude>
+                </excludes>
             </resource>
-            <!-- This is here to simplify working with GWT plugin during test widgetset
-            compilation. Test widgetset is this way more like a real world usage and
-            also lets your test up to e.g. use other add-ons. Ensure these are excluded
-            from the artifact ( jar file ). -->
             <resource>
-                <directory>src/test/resources</directory>
+                <directory>src/main/resources</directory>
             </resource>
         </resources>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
-                    <configuration>
-                        <pushChanges>false</pushChanges>
-                        <localCheckout>true</localCheckout>
-                        <useReleaseProfile>true</useReleaseProfile>
-                        <releaseProfiles>release</releaseProfiles>
-                        <goals>install assembly:single</goals>
-                    </configuration>
-                </plugin>
-
-                <!-- Compile widget set for integration testing -->
-                <plugin>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>vaadin-maven-plugin</artifactId>
-                    <version>${vaadin.version}</version>
-                    <configuration>
-                        <webappDirectory>${project.build.directory}/testwebapp/VAADIN/widgetsets</webappDirectory>
-                        <extraJvmArgs>-Xmx1024M -Xss512m -XX:MaxPermSize=1024m</extraJvmArgs>
-                        <hostedWebapp>${project.build.directory}/testwebapp</hostedWebapp>
-                        <noServer>true</noServer>
-                        <runTarget>http://localhost:9998/</runTarget>
-                        <draftCompile>true</draftCompile>
-                        <style>PRETTY</style>
-                        <!-- We only need to compile the test widgetset, if not defined gwt
-                        module will also compile the add-on widgetset as well -->
-                        <module>org.vaadin.addon.leaflet.googlemutant.Widgetset</module>
-                        <!-- If you do lots of e.g. plain css changes and don't wish to use
-                        hosted mode, you can force compile easily with uncommenting following rule -->
-                        <!-- 						<force>true</force> -->
-                        <strict>true</strict>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <configuration>
-                        <excludes>
-                            <!-- Files here might match to naming convetions, but the are just
-                            vaadin apps containing you add-on components in varios setups. We can ignore
-                            them from test. -->
-                            <exclude>**/demoandtestapp/*</exclude>
-                        </excludes>
-                    </configuration>
-                </plugin>
-                <!--This plugin's configuration is used to store Eclipse m2e settings
-                only. It has no influence on the Maven build itself. -->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>1.0.0</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            com.vaadin
-                                        </groupId>
-                                        <artifactId>
-                                            vaadin-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [2.3.0-1,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                compile
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.apache.maven.plugins
-                                        </groupId>
-                                        <artifactId>
-                                            maven-dependency-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [2.0.0,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                copy-dependencies
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore />
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
 
     </build>
 
@@ -267,41 +118,7 @@
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Maven 2 Repository</name>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
-        </repository>
-        <repository>
-            <id>vaadin-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>vaadin-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -334,39 +151,6 @@
             <version>${vaadin.version}</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-themes</artifactId>
-            <version>${vaadin.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
-            <version>7.2.2.v20101205</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- If you have testbench licence, use that instead of raw selenium. Much
-        more robust results -->
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <version>3.1.1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Open source alternative to TestBench -->
-        <!-- <dependency> -->
-        <!-- <groupId>org.seleniumhq.selenium</groupId> -->
-        <!-- <artifactId>selenium-firefox-driver</artifactId> -->
-        <!-- <version>2.25.0</version> -->
-        <!-- <scope>test</scope> -->
-        <!-- </dependency> -->
-
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
